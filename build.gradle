@@ -63,6 +63,7 @@ def createScript(mainClass, scriptName) {
 }
 createScript('tagger.Tagger', 'Tagger')
 createScript('preprocessing.TextExtractor', 'TextExtractor')
+createScript('preprocessing.Cleaner', 'Cleaner')
 createScript('luceneIndexing.Indexer', 'Indexer')
 createScript('searching.Search_Term_Position', 'Search_Term_Position')
 createScript('patternLearner.TrainingSet', 'TrainingSet')
