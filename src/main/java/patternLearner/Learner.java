@@ -1291,6 +1291,7 @@ public class Learner
 				if (constraint_NP)
 				{
 					//TODO: SPECIFY TAGGING COMMANDS SOMEWHERE ELSE!!!
+					// TODO make this configurable kba
 					Tagger tagger;
 					if (this.language.equals("de")) { tagger = new Tagger("c:/TreeTagger/bin/tag-german", "c:/TreeTagger/bin/chunk-german", "utf-8", "data/tempTagFileIn", "data/tempTagFileOut");}
 					else { tagger = new Tagger("c:/TreeTagger/bin/tag-english", "c:/TreeTagger/bin/chunk-english", "utf-8", "data/tempTagFileIn", "data/tempTagFileOut"); }
@@ -2069,58 +2070,58 @@ public class Learner
 			for (String context : contexts_pos)
 			{
 				totalSentences++;
-				Pattern p = Pattern.compile(ngramRegex[1]);
-				Matcher m = p.matcher(context);
-				if (m.find()) { occurrencesPattern++; }
-			}
+			Pattern p = Pattern.compile(ngramRegex[1]);
+			Matcher m = p.matcher(context);
+			if (m.find()) { occurrencesPattern++; }
+		}
 
-			//double p_xy = occurrencesPattern / totalSentences;
-			double p_xy = occurrencesPattern / data_size;
-			// another way to count joint occurrences
-		
-			/*for ( String[] studyNcontext : extractedInfo )
+		//double p_xy = occurrencesPattern / totalSentences;
+		double p_xy = occurrencesPattern / data_size;
+		// another way to count joint occurrences
+	
+		/*for ( String[] studyNcontext : extractedInfo )
+		{
+			String studyName = studyNcontext[0];
+			String context = studyNcontext[1];
+			String corpusFilename = studyNcontext[2];
+			String usedPat = studyNcontext[3];
+			context = Util.escapeXML(context);
+			//replace all non-characters (utf-8) -> count ALLBUS 2000 and ALLBUS 2001 as instances of ALLBUS...
+			String datasetSeries = studyName.replaceAll( "[^\\p{L}]", "" ).trim();
+			datasetNames.add( datasetSeries );
+			if ( jointOccurrences.containsKey( datasetSeries ))
 			{
-				String studyName = studyNcontext[0];
-				String context = studyNcontext[1];
-				String corpusFilename = studyNcontext[2];
-				String usedPat = studyNcontext[3];
-				context = Util.escapeXML(context);
-				//replace all non-characters (utf-8) -> count ALLBUS 2000 and ALLBUS 2001 as instances of ALLBUS...
-				String datasetSeries = studyName.replaceAll( "[^\\p{L}]", "" ).trim();
-				datasetNames.add( datasetSeries );
-				if ( jointOccurrences.containsKey( datasetSeries ))
-				{
-					jointOccurrences.put( datasetSeries, jointOccurrences.get( datasetSeries ) + 1 );
-				}
-				else { jointOccurrences.put( datasetSeries, 1 ); }
+				jointOccurrences.put( datasetSeries, jointOccurrences.get( datasetSeries ) + 1 );
 			}
-			*/
-			Reliability.Instance newInstance = this.reliability.new Instance(instance);
-			//p_xy: P(x,y) - joint probability of pattern and instance ocurring in data 
-			// all entries in the current context file belong to one instance (seed)
-			// select those entries having the current pattern
+			else { jointOccurrences.put( datasetSeries, 1 ); }
+		}
+		*/
+		Reliability.Instance newInstance = this.reliability.new Instance(instance);
+		//p_xy: P(x,y) - joint probability of pattern and instance ocurring in data 
+		// all entries in the current context file belong to one instance (seed)
+		// select those entries having the current pattern
 
-			//additional searching step here is not necessary... change that
-			//int jointOccurrences_xy = jointOccurrences.get( instance );
-			//double p_xy = jointOccurrences_xy / data_size;
+		//additional searching step here is not necessary... change that
+		//int jointOccurrences_xy = jointOccurrences.get( instance );
+		//double p_xy = jointOccurrences_xy / data_size;
 
-			//1. search for instance in the corpus
-			//creates context xml files - if dataset is searched again as seed, saved file can be used
-			//TrainingSet instanceContexts = searchForInstanceInCorpus( instance );
-			//2. process context files
-			//info needed: (1) contexts, (2) filenames (when counting occurrences per file)
-			
-			//HashSet<String[]> contexts = instanceContexts.getContexts();
-			//HashSet<String> filenames = instanceContexts.getDocuments();
-					
-			//p_x: P(x) - probability of instance occurring in the data
-			//number of times the instance occurs in the corpus
-			//int totalOccurrences_x = contexts.size();
-			//double p_x = totalOccurrences_x / data_size;
-			double p_x = totalSentences / data_size;
-			//p_x: P(y) - probability of pattern occurring in the data				
+		//1. search for instance in the corpus
+		//creates context xml files - if dataset is searched again as seed, saved file can be used
+		//TrainingSet instanceContexts = searchForInstanceInCorpus( instance );
+		//2. process context files
+		//info needed: (1) contexts, (2) filenames (when counting occurrences per file)
+		
+		//HashSet<String[]> contexts = instanceContexts.getContexts();
+		//HashSet<String> filenames = instanceContexts.getDocuments();
 				
-			System.out.println("Computing pmi of " + ngramRegex[1] + " and " + instance);
+		//p_x: P(x) - probability of instance occurring in the data
+		//number of times the instance occurs in the corpus
+		//int totalOccurrences_x = contexts.size();
+		//double p_x = totalOccurrences_x / data_size;
+		double p_x = totalSentences / data_size;
+		//p_x: P(y) - probability of pattern occurring in the data				
+			
+		System.out.println("Computing pmi of " + ngramRegex[1] + " and " + instance);
 			double pmi_pattern = pmi(p_xy, p_x, p_y);
 			newPat.addAssociation(instance, pmi_pattern);
 			newInstance.addAssociation(newPat.pattern, pmi_pattern);
@@ -2612,7 +2613,7 @@ public class Learner
 			// load saved patterns
 			HashSet<String> patternSet1;
 			try { patternSet1 = Util.getDisctinctPatterns(new File(path_patterns)); }
-			catch (IOException ioe) { patternSet1 = new HashSet<String>(); }
+			catch (IOException ioe) { patternSet1 = new HashSet<String>(); } // TODO maybe throw this? kba
 
 			// list previously processed files to allow pausing and resuming of testing operation
 			HashSet<String> processedFiles = new HashSet<String>();
@@ -2630,26 +2631,30 @@ public class Learner
 			}
 			catch (IOException ioe) { System.err.println("warning: could not read processedDocs file. continuing... "); }
 		    File corpus = new File(path_corpus);
-		    String[] corpus_complete = corpus.list();
+		    String[] corpus_complete = corpus.list(); // TODO listFiles()? dr
 		    HashSet<String> corpus_test_list = new HashSet<String>();
 		    for (int i=0; i<corpus_complete.length; i++) {
-		    	if ( !processedFiles.contains(new File(path_corpus + corpus_complete[i]).getAbsolutePath())) 
-		    	    	{ corpus_test_list.add(new File(path_corpus + corpus_complete[i]).getAbsolutePath()); }
+		    	if ( !processedFiles.contains(new File(path_corpus + corpus_complete[i]).getAbsolutePath())) {
+		    		corpus_test_list.add(new File(path_corpus + corpus_complete[i]).getAbsolutePath());
 		    	}
-		    	String[] corpus_test = new String[corpus_test_list.size()];
-		    	corpus_test_list.toArray(corpus_test);
-		    	System.out.println(corpus_test.length);
-		    	System.out.println(processedFiles.size());
-		    	System.out.println(corpus_complete.length); 
-		    	
-		    	if (corpus_complete == null) {
-		    	    // Either dir does not exist or is not a directory
-		    	} else {
-		    	    for (int i=0; i<corpus_complete.length; i++) 
-		    	    { 
-		    	    	corpus_complete[i] = new File(path_corpus + File.separator + corpus_complete[i]).getAbsolutePath(); 
-		    	    }
-		    	}
+			}
+			String[] corpus_test = new String[corpus_test_list.size()];
+			corpus_test_list.toArray(corpus_test);
+			// TODO debugging output kba
+			System.out.println(corpus_test.length);
+			System.out.println(processedFiles.size());
+			System.out.println(corpus_complete.length); 
+
+			// TODO kba Delete this whole corpus_complete stuff here (copy&paste)?
+			if (corpus_complete == null) {
+				// Either dir does not exist or is not a directory
+				// TODO catch this earlier
+			} else {
+				for (int i=0; i<corpus_complete.length; i++) 
+				{ 
+					corpus_complete[i] = new File(path_corpus + File.separator + corpus_complete[i]).getAbsolutePath(); 
+				}
+			}
 		    // need new Learner instance for each task - else, previously processed patterns will not be processed again
 		    Learner newLearner = new Learner(constraint_NP, constraint_upperCase, german, path_corpus, path_index, "", "", path_output);
 		    ArrayList<String[]> resNgrams1 = newLearner.getStudyRefs(patternSet1,corpus_test,path_output);
@@ -2786,6 +2791,7 @@ public class Learner
 			return dateFormat.format(date);
 		}
 		
+		// TODO debug only kba
 		public void outputParameterInfo(Collection<String> initialSeeds, String path_index, String path_train, String path_corpus, String path_output, String path_contexts, String path_arffs, boolean constraint_NP, boolean constraint_upperCase, String method, double threshold)
 		{
 			String delimiter = Util.delimiter_csv;
@@ -2895,7 +2901,7 @@ class OptionHandler {
     @Option(name="-p",usage="use existing extraction patterns listed in this file", metaVar = "PATTERNS_FILENAME")
     private String patternPath;
     
-    @Option(name="-t",usage="apply term search for dataset names listed in this file", metaVar = "TERMS_FILENAME")
+    @Option(name="-t",usage="apply term search for dataset names listed in this file", metaVar = "TERMS_FILENAME", required = false)
     private String termsPath;
     
     @Option(name="-o",usage="output to this directory", metaVar="OUTPUT_PATH", required = true)
@@ -2973,7 +2979,16 @@ class OptionHandler {
 				// create output path if not existent
 				File op = Paths.get(outputPath + File.separator + basePath + File.separator).normalize().toFile();
 				if(!op.exists()) { op.mkdirs(); System.out.println("Created directory " + op); }
-				if(patternPath != null) { Learner.useExistingPatterns(patternPath, outputPath + File.separator + basePath + File.separator, corpusPath + File.separator + basePath + File.separator, indexPath + "_" + basePath, constraintNP, constraintUC, german); }
+				if(patternPath != null) {
+					Learner.useExistingPatterns(
+							patternPath,
+							outputPath + File.separator + basePath + File.separator,
+							corpusPath + File.separator + basePath + File.separator,
+							indexPath + "_" + basePath,
+							constraintNP,
+							constraintUC,
+							german); 
+				}
 				if(termsPath != null) { Learner.searchForTerms(outputPath + File.separator + basePath + File.separator, corpusPath + File.separator + basePath + File.separator, indexPath + "_" + basePath, termsPath, termsOut, constraintNP, constraintUC, german); }
 			}
 		}
