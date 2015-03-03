@@ -3,3 +3,4 @@ build
 .ropeproject
 data
 small.zip
+*.pyc
